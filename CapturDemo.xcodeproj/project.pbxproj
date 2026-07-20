@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		ECA33E02300E76EF0076E001 /* CapturSDK in Frameworks */ = {isa = PBXBuildFile; productRef = ECA33E01300E76EF0076E001 /* CapturSDK */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		ECA33DE6300E74240076E001 /* CapturDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CapturDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				ECA33E02300E76EF0076E001 /* CapturSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = CapturDemo;
 			packageProductDependencies = (
+				ECA33E01300E76EF0076E001 /* CapturSDK */,
 			);
 			productName = CapturDemo;
 			productReference = ECA33DE6300E74240076E001 /* CapturDemo.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = ECA33DDD300E74240076E001;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				ECA33E00300E76EF0076E001 /* XCRemoteSwiftPackageReference "captur-mobile-sdk-ios" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ECA33DE7300E74240076E001 /* Products */;
 			projectDirPath = "";
@@ -256,6 +265,7 @@
 				DEVELOPMENT_TEAM = 5W9MZVL4FY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is required";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -288,6 +298,7 @@
 				DEVELOPMENT_TEAM = 5W9MZVL4FY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is required";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -332,6 +343,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		ECA33E00300E76EF0076E001 /* XCRemoteSwiftPackageReference "captur-mobile-sdk-ios" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://gitlab.development.captur.ai/Captur/captur-mobile-sdk-ios";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		ECA33E01300E76EF0076E001 /* CapturSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = ECA33E00300E76EF0076E001 /* XCRemoteSwiftPackageReference "captur-mobile-sdk-ios" */;
+			productName = CapturSDK;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = ECA33DDE300E74240076E001 /* Project object */;
 }

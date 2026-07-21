@@ -65,7 +65,8 @@ app's lifetime.
 3. **Open the camera** — presenting the SwiftUI `CapturCameraScreen` is what
    starts the preview and live predictions; there is no `start()` call.
 4. **Handle events** — every result arrives through the single event callback:
-   `.prediction` (live guidance per frame), `.finalDecision` (the outcome), and
+   `.prediction` (live guidance per frame, including each model label with its
+   confidence — shown live in the demo), `.finalDecision` (the outcome), and
    `.failed`. Capture with `controller.captureImage()` for a manual shutter, or
    let the SDK finalize automatically when the photo looks consistently good or
    on timeout (see `finalDecision.trigger`).
@@ -86,7 +87,7 @@ does not upload images.
 - [`CaptureFlowModel.swift`](CapturDemo/CaptureFlowModel.swift) — **the SDK showcase**: the full lifecycle as one small state machine, one method per step.
 - [`HomeView.swift`](CapturDemo/HomeView.swift) — use-case picker.
 - [`FlowView.swift`](CapturDemo/FlowView.swift) — the step-by-step walkthrough: runs and explains each SDK call.
-- [`CaptureView.swift`](CapturDemo/CaptureView.swift) — camera screen with overlay and result panel.
+- [`CaptureView.swift`](CapturDemo/CaptureView.swift) — camera screen with the controller's camera controls (torch, front/back, lens, zoom), a live prediction panel, and the result panel.
 
 ## CI
 

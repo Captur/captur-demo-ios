@@ -31,6 +31,10 @@ final class CaptureFlowModel: ObservableObject {
     /// Live guidance from the latest `.prediction` event.
     @Published private(set) var liveHint: String?
 
+    /// The latest full `.prediction` — model + per-label confidences,
+    /// shown live on the camera screen.
+    @Published private(set) var livePrediction: CapturPrediction?
+
     /// The last error, shown as a transient toast; the failed step can be retried.
     @Published private(set) var errorMessage: String?
     private var errorDismissTask: Task<Void, Never>?
@@ -104,6 +108,7 @@ final class CaptureFlowModel: ObservableObject {
     func openCamera() {
         guard case .cameraReady = phase else { return }
         liveHint = nil
+        livePrediction = nil
         phase = .cameraOpen
     }
 
@@ -113,6 +118,7 @@ final class CaptureFlowModel: ObservableObject {
         case .prediction(let prediction):
             // Live, per-frame guidance while the user frames the photo.
             liveHint = prediction.decision?.title ?? prediction.decision?.value
+            livePrediction = prediction
         case .finalDecision(let finalDecision):
             // The capture outcome: JPEG image + decision + what triggered it.
             // What happens next (display, upload, persist) is up to the app.
@@ -142,6 +148,7 @@ final class CaptureFlowModel: ObservableObject {
         do {
             try cameraController.retake()
             liveHint = nil
+            livePrediction = nil
             phase = .cameraOpen
         } catch {
             showError(error.localizedDescription)
@@ -149,8 +156,21 @@ final class CaptureFlowModel: ObservableObject {
         }
     }
 
-    func toggleTorch() async {
-        try? await cameraController?.toggleTorch()
+    // Camera controls — each toggles hardware state on the open camera.
+    // Unsupported combinations (e.g. torch on the front camera) throw and
+    // surface as a toast.
+    func toggleTorch() async { await runCameraControl { try await $0.toggleTorch() } }
+    func togglePosition() async { await runCameraControl { try await $0.togglePosition() } }
+    func toggleLens() async { await runCameraControl { try await $0.toggleLens() } }
+    func toggleZoom() async { await runCameraControl { try await $0.toggleZoom() } }
+
+    private func runCameraControl(_ control: (CapturCameraController) async throws -> Void) async {
+        guard let cameraController else { return }
+        do {
+            try await control(cameraController)
+        } catch {
+            showError(error.localizedDescription)
+        }
     }
 
     /// Step 5: Close. Dismissing `CapturCameraScreen` — removing it from the
@@ -163,6 +183,7 @@ final class CaptureFlowModel: ObservableObject {
         cameraController = nil
         session = nil
         liveHint = nil
+        livePrediction = nil
         phase = .closed(finalDecision)
     }
 
@@ -170,6 +191,7 @@ final class CaptureFlowModel: ObservableObject {
         cameraController = nil
         session = nil
         liveHint = nil
+        livePrediction = nil
         dismissError()
         phase = .idle
     }

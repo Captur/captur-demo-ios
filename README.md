@@ -36,6 +36,9 @@ login <your-username>
 password <your-access-token>
 ```
 
+Restrict access to the file (`chmod 600 ~/.netrc`) and never commit the token
+or the `.netrc` file to this repository.
+
 ## Setup
 
 1. **API key** — paste the API key Captur gave you into

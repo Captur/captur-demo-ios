@@ -2,16 +2,16 @@
 //  CapturDemoApp.swift
 //  CapturDemo
 //
-//  Created by Ahd H A Radwan on 20/07/2026.
-//
 
 import SwiftUI
 
 @main
 struct CapturDemoApp: App {
+    @StateObject private var model = CaptureFlowModel()
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            HomeView(model: model)
         }
     }
 }

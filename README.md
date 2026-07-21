@@ -2,7 +2,7 @@
 
 Captur Demo is a small SwiftUI application used to verify and demonstrate integration with the private `CapturSDK` iOS package.
 
-The application is currently a starter project. It imports the SDK and creates a `Captur` instance, but it does not yet expose any Captur functionality in the user interface. The main screen still displays the default “Hello, world!” content.
+The application is currently a starter project. Its main view initializes the SDK, prepares and stores a Captur session and camera controller, presents the SDK's exported camera screen, displays live predictions, and shows the captured photo after a final decision. From the result, the user can start a new session flow or retake with the current controller.
 
 ## Requirements
 
@@ -47,30 +47,31 @@ Never commit the token or the `.netrc` file to this repository.
 1. Configure GitLab authentication as described above.
 2. Open `CapturDemo.xcodeproj` in Xcode.
 3. Allow Xcode to resolve the Swift package dependency.
-4. Replace `YOUR_API_KEY` in `CapturDemoApp.swift` with a development API key.
+4. Replace the API key and policy type in `CapturDemoModel.swift` with development values.
 5. Select an iOS Simulator and run the `CapturDemo` scheme.
 
 Do not commit a production API key. As the application grows, the API key should be supplied through an appropriate secrets or configuration mechanism instead of being stored directly in source code.
 
 ## Current SDK integration
 
-The app entry point currently verifies that the SDK module and its primary client type are available:
+All CapturSDK lifecycle code lives in `CapturDemoModel.swift`. The integration itself remains three small calls:
 
 ```swift
-import CapturSDK
-import SwiftUI
+let captur = Captur(apiKey: "YOUR_API_KEY")
 
-@main
-struct CapturDemoApp: App {
-    let captur = Captur(apiKey: "YOUR_API_KEY")
+session = try await captur.prepareSession(
+    policyType: "YOUR_POLICY_TYPE",
+    location: location
+)
 
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
-    }
+cameraController = try await session.prepareCamera(location: location) { event in
+    // Handle live predictions, the final decision, and failures.
 }
+
+try cameraController.retake()
 ```
+
+`ContentView.swift` only presents the preparation steps. `CameraExperienceView.swift` keeps `CapturCameraScreen` mounted while showing live predictions and the captured result, allowing `retake()` to reuse the same controller. Manually closing the live camera clears both the controller and its closed session, returning the demo to the start.
 
 This code compiles for both Apple Silicon and Intel iOS Simulator architectures.
 
@@ -78,8 +79,10 @@ This code compiles for both Apple Silicon and Intel iOS Simulator architectures.
 
 | Path | Purpose |
 | --- | --- |
-| `CapturDemo/CapturDemoApp.swift` | Application entry point and initial SDK setup |
-| `CapturDemo/ContentView.swift` | Starter SwiftUI screen |
+| `CapturDemo/CapturDemoApp.swift` | Application entry point |
+| `CapturDemo/ContentView.swift` | Three-step preparation flow |
+| `CapturDemo/CapturDemoModel.swift` | CapturSDK lifecycle and event handling |
+| `CapturDemo/CameraExperienceView.swift` | Camera, prediction, and captured-result UI |
 | `CapturDemo.xcodeproj` | Xcode application and Swift package configuration |
 | `.github/workflows/build.yml` | GitHub Actions build workflow |
 

@@ -40,7 +40,7 @@ enum DemoStep: Int, CaseIterable, Identifiable {
     var detail: String {
         switch self {
         case .prepareSession:
-            return "Authenticates with your API key and warms up the on-device model. Call it early, ahead of capture."
+            return "Authenticates with your API key and downloads the on-device model. Call it early, ahead of capture."
         case .prepareCamera:
             return "Loads the models and returns a camera controller. The app must hold camera permission — the SDK checks but never prompts."
         case .openCamera:
@@ -77,8 +77,15 @@ struct FlowView: View {
         .navigationTitle(useCase.title)
         .navigationBarTitleDisplayMode(.inline)
         .onDisappear { model.reset() }
+        // The camera screen is presented while the phase is "open" or showing
+        // a final decision; dismissing it closes the camera (Step 5).
         .fullScreenCover(isPresented: Binding(
-            get: { model.isCameraPresented },
+            get: {
+                switch model.phase {
+                case .cameraOpen, .finished: return true
+                default: return false
+                }
+            },
             set: { if !$0 { model.closeCamera() } }
         )) {
             CaptureView(model: model)

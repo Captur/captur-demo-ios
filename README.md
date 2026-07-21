@@ -7,7 +7,7 @@ It mimics two real use cases — verifying an **e-bike is parked correctly**
 small Swift files.
 
 > **Alpha.** The Captur iOS SDK is in alpha; its API may change before general
-> availability. This demo pins the exact SDK version.
+> availability. Review the changelog when upgrading.
 
 ## Requirements
 
@@ -23,8 +23,8 @@ The SDK is distributed as a binary XCFramework via Swift Package Manager:
 
 1. In Xcode: *File → Add Package Dependencies…* and enter
    `https://gitlab.development.captur.ai/Captur/captur-mobile-sdk-ios`
-2. Pin the **exact** version (this demo pins `0.1.0`) and add the `CapturSDK`
-   product to your app target.
+2. Choose the dependency rule (this demo uses *Up to Next Major Version* from
+   `0.1.0`) and add the `CapturSDK` product to your app target.
 
 The package is hosted on Captur's GitLab and requires credentials. Captur
 provides an access token — put it in `~/.netrc` so Xcode and SPM can resolve
@@ -55,7 +55,7 @@ Before everything, initialize once: `Captur(apiKey:)`, one instance for the
 app's lifetime.
 
 1. **Prepare the session** — `captur.prepareSession(policyType:location:reference:metadata:)`
-   authenticates with your API key and warms up the on-device model; call it
+   authenticates with your API key and downloads the on-device model; call it
    early, ahead of capture. The demo's two policy types are `"eBike"` and
    `"package"`.
 2. **Prepare the camera** — `session.prepareCamera(location:onCapturEvent:)`

@@ -29,7 +29,7 @@ final class CaptureFlowModel: ObservableObject {
     @Published private(set) var phase: Phase = .idle
 
     /// Live guidance from the latest `.prediction` event.
-    @Published private(set) var liveHint: String?
+    @Published private(set) var livePredictions: String?
 
     /// The last error, shown as a transient toast; the failed step can be retried.
     @Published private(set) var errorMessage: String?
@@ -42,16 +42,8 @@ final class CaptureFlowModel: ObservableObject {
     // of the app. Initialization is lightweight and synchronous.
     private let captur = Captur(apiKey: CapturConfig.apiKey)
 
-    /// The camera screen is presented during Step 3 (open) and Step 4 (handle).
-    var isCameraPresented: Bool {
-        switch phase {
-        case .cameraOpen, .finished: return true
-        default: return false
-        }
-    }
-
     /// Step 1: Prepare a session for the policy. This authenticates with your
-    /// API key and warms up the on-device model — call it early, ahead of capture.
+    /// API key and downloads the on-device model — call it early, ahead of capture.
     func prepareSession(for useCase: UseCase) async {
         dismissError()
         phase = .preparingSession
@@ -64,7 +56,7 @@ final class CaptureFlowModel: ObservableObject {
             )
             phase = .sessionReady
         } catch CapturSessionError.authenticationFailed {
-            showError("Authentication failed. Paste your API key into CapturConfig.swift.")
+            showError("Authentication failed. API key is either missing or malformed/expired")
             phase = .idle
         } catch {
             showError(error.localizedDescription)
@@ -89,7 +81,7 @@ final class CaptureFlowModel: ObservableObject {
             cameraController = try await session.prepareCamera(
                 location: useCase.demoLocation,
                 onCapturEvent: { [weak self] event in
-                    self?.handle(event)
+                    self?.handleCapturEvents(event)
                 }
             )
             phase = .cameraReady
@@ -103,16 +95,16 @@ final class CaptureFlowModel: ObservableObject {
     /// `CapturCameraScreen` is what starts the preview and live predictions.
     func openCamera() {
         guard case .cameraReady = phase else { return }
-        liveHint = nil
+        livePredictions = nil
         phase = .cameraOpen
     }
 
     // Step 4: Handle events while the camera is open.
-    private func handle(_ event: CapturEvents) {
+    private func handleCapturEvents(_ event: CapturEvents) {
         switch event {
         case .prediction(let prediction):
             // Live, per-frame guidance while the user frames the photo.
-            liveHint = prediction.decision?.title ?? prediction.decision?.value
+            livePredictions = prediction.decision?.title ?? prediction.decision?.value
         case .finalDecision(let finalDecision):
             // The capture outcome: JPEG image + decision + what triggered it.
             // What happens next (display, upload, persist) is up to the app.
@@ -140,8 +132,8 @@ final class CaptureFlowModel: ObservableObject {
     func retake() {
         guard let cameraController, case .finished = phase else { return }
         do {
+            livePredictions = nil
             try cameraController.retake()
-            liveHint = nil
             phase = .cameraOpen
         } catch {
             showError(error.localizedDescription)
@@ -162,14 +154,14 @@ final class CaptureFlowModel: ObservableObject {
         if case .finished(let final) = phase { finalDecision = final }
         cameraController = nil
         session = nil
-        liveHint = nil
+        livePredictions = nil
         phase = .closed(finalDecision)
     }
 
     func reset() {
         cameraController = nil
         session = nil
-        liveHint = nil
+        livePredictions = nil
         dismissError()
         phase = .idle
     }

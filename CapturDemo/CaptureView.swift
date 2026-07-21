@@ -50,7 +50,7 @@ struct CaptureView: View {
 
             Spacer()
 
-            if let hint = model.liveHint {
+            if let hint = model.livePredictions {
                 Text(hint)
                     .font(.callout.weight(.medium))
                     .padding(.horizontal, 16)

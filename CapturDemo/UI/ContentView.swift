@@ -34,10 +34,17 @@ struct ContentView: View {
             } else {
                 successLabel("Session Prepared")
 
-                // prepareCamera is the SDK call; the camera screen presents
-                // itself as soon as a controller exists, so one tap does both.
-                Button("Open Camera") {
-                    Task { await demo.prepareCamera() }
+                if demo.cameraController == nil {
+                    // prepareCamera is the SDK call; the camera screen
+                    // presents itself once a controller exists.
+                    Button("Open Camera") {
+                        Task { await demo.prepareCamera() }
+                    }
+                } else {
+                    // The session already has its camera — re-present it.
+                    Button("Resume Camera") {
+                        demo.resumeCamera()
+                    }
                 }
             }
 
@@ -64,8 +71,8 @@ struct ContentView: View {
         // any close button) resets the flow, matching the SDK rule that an
         // unmounted camera closes its session.
         .fullScreenCover(isPresented: Binding(
-            get: { demo.cameraController != nil },
-            set: { if !$0 { Task { await demo.resetSession() } } }
+            get: { demo.isCameraPresented },
+            set: { if !$0 { demo.dismissCamera() } }
         )) {
             CameraExperienceView(model: demo)
         }

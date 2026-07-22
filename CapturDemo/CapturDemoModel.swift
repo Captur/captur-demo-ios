@@ -37,6 +37,11 @@ final class CapturDemoModel: ObservableObject {
     /// the policy model), so the UI shows a spinner for it.
     @Published private(set) var isPreparingSession = false
 
+    /// Whether the camera screen is on screen. Separate from
+    /// `cameraController`: dismissing the camera keeps the controller alive
+    /// so the same camera can be resumed later.
+    @Published private(set) var isCameraPresented = false
+
     /// Step 1 — `captur.prepareSession`. Authenticates with the API key and
     /// downloads the policy model for the use case, so call it ahead of
     /// capture. A session is single-use: once its camera closes, prepare a
@@ -81,9 +86,21 @@ final class CapturDemoModel: ObservableObject {
             ) { [weak self] event in
                 self?.handleCapturEvent(event)
             }
+            isCameraPresented = true
         } catch {
             errorMessage = error.localizedDescription
         }
+    }
+
+    /// Re-presents the camera screen with the existing controller. A session
+    /// allows one camera at a time — preparing a second one throws
+    /// `.cameraAlreadyActive` — so resuming means remounting the same one.
+    func resumeCamera() {
+        guard cameraController != nil else { return }
+
+        errorMessage = nil
+        latestPrediction = nil
+        isCameraPresented = true
     }
 
     /// Discards the captured result and resumes the still-open camera —
@@ -105,47 +122,84 @@ final class CapturDemoModel: ObservableObject {
     /// Manual shutter. The final image and decision arrive through the
     /// event callback as `.finalDecision`, not as a return value.
     func captureImage() async {
-        await performCameraControl { try await $0.captureImage() }
-    }
-
-    func toggleTorch() async {
-        await performCameraControl { try await $0.toggleTorch() }
-    }
-
-    func togglePosition() async {
-        await performCameraControl { try await $0.togglePosition() }
-    }
-
-    func toggleLens() async {
-        await performCameraControl { try await $0.toggleLens() }
-    }
-
-    func toggleZoom() async {
-        await performCameraControl { try await $0.toggleZoom() }
-    }
-
-    /// Unsupported combinations (e.g. torch on the front camera) throw;
-    /// the message is surfaced like any other error.
-    private func performCameraControl(
-        _ control: (CapturCameraController) async throws -> Void
-    ) async {
         guard let cameraController else { return }
 
         errorMessage = nil
 
         do {
-            try await control(cameraController)
+            try await cameraController.captureImage()
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
-    /// Back to the start. Clearing `cameraController` unmounts
-    /// `CapturCameraScreen`, and since SDK 0.2.0 the client must also call
-    /// `close()` on the controller to finish cleanup — dismounting alone is
-    /// no longer enough. The next attempt starts over with a fresh session.
-    func resetSession() async {
+    // Camera hardware controls. Unsupported combinations (e.g. torch on the
+    // front camera) throw; the message is surfaced like any other error.
+
+    func toggleTorch() async {
+        guard let cameraController else { return }
+
+        errorMessage = nil
+
+        do {
+            try await cameraController.toggleTorch()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func togglePosition() async {
+        guard let cameraController else { return }
+
+        errorMessage = nil
+
+        do {
+            try await cameraController.togglePosition()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func toggleLens() async {
+        guard let cameraController else { return }
+
+        errorMessage = nil
+
+        do {
+            try await cameraController.toggleLens()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    func toggleZoom() async {
+        guard let cameraController else { return }
+
+        errorMessage = nil
+
+        do {
+            try await cameraController.toggleZoom()
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Hides the camera without ending anything: the controller stays alive
+    /// and the session still counts it as its active camera, so the same
+    /// camera can be resumed with `resumeCamera()`.
+    func dismissCamera() {
+        isCameraPresented = false
+        latestPrediction = nil
+        errorMessage = nil
+    }
+
+    /// Ends the flow for good — only the review screen offers this. Clearing
+    /// `cameraController` unmounts `CapturCameraScreen`, and since SDK 0.2.0
+    /// the client must also call `close()` on the controller, which closes
+    /// the session with it. The next attempt starts over with a fresh one.
+    func closeSession() async {
         let controller = cameraController
+        isCameraPresented = false
         session = nil
         cameraController = nil
         latestPrediction = nil
@@ -153,6 +207,8 @@ final class CapturDemoModel: ObservableObject {
         errorMessage = nil
         await controller?.close()
     }
+    
+    
 
     /// The single channel for everything the camera reports, delivered on
     /// the main actor.

@@ -57,7 +57,9 @@ Never commit the token or the `.netrc` file to this repository.
 2. **Prepare Session** — `captur.prepareSession(policyType:location:)`. Authenticates with the API key and downloads the policy model; the heaviest call, so the UI shows a spinner.
 3. **Open Camera** — `session.prepareCamera(location:onCapturEvent:)` loads the models and returns a camera controller; the camera screen presents itself as soon as the controller exists. The app requests camera permission first — the SDK checks it but never prompts.
 4. **Capture** — live predictions render at the bottom of the camera. Capture manually with the shutter, or let the SDK finalize on its own after a run of consistently good frames or a timeout. The camera controls (torch, front/back, lens, zoom) call straight into the controller.
-5. **Result** — the final decision carries the JPEG; the app shows it framed with **New Session** and **Retake**. Retake resumes the still-open camera; New Session dismisses the camera screen and calls `controller.close()` — since SDK 0.2.0, clients must call `close()` in addition to removing `CapturCameraScreen` from the hierarchy. Each new attempt starts with a fresh session. Persisting or uploading the image is the app's responsibility, not the SDK's.
+5. **Result** — the final decision carries the JPEG; the app shows it framed with **New Session** and **Retake**. Retake resumes the still-open camera. New Session ends the flow: it calls `controller.close()`, which closes the session — the only place the demo does. Each new attempt starts with a fresh session. Persisting or uploading the image is the app's responsibility, not the SDK's.
+
+Closing the camera and closing the session are separate in SDK 0.2.0: the X on the camera screen only hides the camera — the controller stays alive and the session still counts it as its active camera (a session allows one camera at a time; preparing a second throws `cameraAlreadyActive`). The Open Camera button becomes **Resume Camera** and re-presents the same controller.
 
 All CapturSDK lifecycle code lives in `CapturDemoModel.swift`. The integration itself remains a handful of small calls:
 

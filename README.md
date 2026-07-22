@@ -51,8 +51,6 @@ Never commit the token or the `.netrc` file to this repository.
 4. Paste your API key into `CapturDemo/CapturConfig.swift`.
 5. Select a device and run the `CapturDemo` scheme.
 
-Do not commit a real API key. As the application grows, the API key should be supplied through an appropriate secrets or configuration mechanism instead of being stored directly in source code.
-
 ## The demo flow
 
 1. **Pick a use case** — e-bike parking or package delivery. Each maps to a Captur policy type and a capture location (`UseCase.swift`). The SDK never reads GPS; the app supplies every coordinate.
@@ -96,10 +94,6 @@ await cameraController.close()
 | `.github/workflows/build.yml` | GitHub Actions build workflow |
 
 ## Continuous integration
-
-The GitHub Actions workflow in `.github/workflows/build.yml` verifies that the application and `CapturSDK` compile together. It runs on pushes to `main`, on pull requests, and manually via `workflow_dispatch`; only the most recent build per branch continues running.
-
-The job uses GitHub's `macos-26` runner with Xcode 26.6, builds the `Debug` configuration for a generic iOS Simulator destination with code signing disabled, and resolves dependencies strictly from the committed `Package.resolved`. It builds the application only — no tests are run.
 
 GitLab authentication comes from one repository secret, configured under **Settings → Secrets and variables → Actions**:
 

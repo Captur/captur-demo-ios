@@ -12,6 +12,7 @@ struct CapturDemoApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .capturThemed()
         }
     }
 }

@@ -5,53 +5,71 @@
 
 import AVFoundation
 import CapturSDK
-import Observation
-import UIKit
+import Combine
 
+/// Owns the entire CapturSDK lifecycle for one capture flow:
+/// prepare a session → prepare the camera → receive events → retake or reset.
+/// Everything the SDK reports flows out through the published properties below.
 @MainActor
-@Observable
-final class CapturDemoModel {
-    enum Step {
-        case session
-        case camera
-        case ready
-    }
+final class CapturDemoModel: ObservableObject {
+    // One Captur instance for the lifetime of the app; initialization is
+    // lightweight and synchronous.
+    private let captur = Captur(apiKey: CapturConfig.apiKey)
 
-    private let captur = Captur(apiKey: "captur-workspace-697553f4a3d02d97a5a25614.0832c852-cda0-429f-948a-ccc766461361")
-    private let location = CapturLocation(latitude: 51.5074, longitude: -0.1278)
+    // Chosen when the session is prepared; the camera reuses its location.
+    // The SDK never reads GPS — the app supplies every coordinate.
+    private var useCase: UseCase = .eBikeParking
 
-    private(set) var session: CapturSession?
-    private(set) var cameraController: CapturCameraController?
-    private(set) var latestPrediction: CapturPrediction?
-    private(set) var capturedImage: UIImage?
-    private(set) var errorMessage: String?
+    @Published private(set) var session: CapturSession?
+    @Published private(set) var cameraController: CapturCameraController?
 
-    var step: Step {
-        if cameraController != nil { return .ready }
-        if session != nil { return .camera }
-        return .session
-    }
+    /// Latest `.prediction` — refreshed on every camera frame while capturing.
+    @Published private(set) var latestPrediction: CapturPrediction?
 
-    func prepareSession() async {
+    /// The capture outcome: image data, decision, and what triggered it.
+    /// Non-nil means a capture finished; uploading or persisting the JPEG
+    /// is the app's job, not the SDK's.
+    @Published private(set) var finalDecision: CapturFinalDecision?
+
+    @Published private(set) var errorMessage: String?
+
+    /// True while `prepareSession` runs — the heaviest call (it downloads
+    /// the policy model), so the UI shows a spinner for it.
+    @Published private(set) var isPreparingSession = false
+
+    /// Step 1 — `captur.prepareSession`. Authenticates with the API key and
+    /// downloads the policy model for the use case, so call it ahead of
+    /// capture. A session is single-use: once its camera closes, prepare a
+    /// new one.
+    func prepareSession(for useCase: UseCase) async {
+        self.useCase = useCase
         errorMessage = nil
+        isPreparingSession = true
+        defer { isPreparingSession = false }
 
         do {
             session = try await captur.prepareSession(
-                policyType: "eBike",
-                location: location
+                policyType: useCase.policyType,
+                location: useCase.demoLocation
             )
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
+    /// Step 2 — `session.prepareCamera`. Loads the downloaded models and
+    /// returns the controller that `CapturCameraScreen` renders. Every later
+    /// result — live predictions, the final decision, failures — arrives
+    /// through the single event callback passed here.
     func prepareCamera() async {
         guard let session else { return }
 
         errorMessage = nil
         latestPrediction = nil
-        capturedImage = nil
+        finalDecision = nil
 
+        // The SDK checks camera permission but never prompts for it;
+        // without this request it would throw .cameraPermissionUnavailable.
         guard await AVCaptureDevice.requestAccess(for: .video) else {
             errorMessage = "Camera access is required."
             return
@@ -59,7 +77,7 @@ final class CapturDemoModel {
 
         do {
             cameraController = try await session.prepareCamera(
-                location: location
+                location: useCase.demoLocation
             ) { [weak self] event in
                 self?.handleCapturEvent(event)
             }
@@ -68,6 +86,8 @@ final class CapturDemoModel {
         }
     }
 
+    /// Discards the captured result and resumes the still-open camera —
+    /// valid only while `CapturCameraScreen` remains mounted.
     func retake() {
         guard let cameraController else { return }
 
@@ -76,34 +96,74 @@ final class CapturDemoModel {
         do {
             try cameraController.retake()
             latestPrediction = nil
-            capturedImage = nil
+            finalDecision = nil
         } catch {
             errorMessage = error.localizedDescription
         }
     }
 
+    /// Manual shutter. The final image and decision arrive through the
+    /// event callback as `.finalDecision`, not as a return value.
+    func captureImage() async {
+        await performCameraControl { try await $0.captureImage() }
+    }
+
+    func toggleTorch() async {
+        await performCameraControl { try await $0.toggleTorch() }
+    }
+
+    func togglePosition() async {
+        await performCameraControl { try await $0.togglePosition() }
+    }
+
+    func toggleLens() async {
+        await performCameraControl { try await $0.toggleLens() }
+    }
+
+    func toggleZoom() async {
+        await performCameraControl { try await $0.toggleZoom() }
+    }
+
+    /// Unsupported combinations (e.g. torch on the front camera) throw;
+    /// the message is surfaced like any other error.
+    private func performCameraControl(
+        _ control: (CapturCameraController) async throws -> Void
+    ) async {
+        guard let cameraController else { return }
+
+        errorMessage = nil
+
+        do {
+            try await control(cameraController)
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    /// Back to the start. Removing `CapturCameraScreen` from the view
+    /// hierarchy is what closes the camera and its session (the SDK has no
+    /// close() call); dropping our references here just mirrors that. The
+    /// next attempt starts over with a fresh session.
     func resetSession() {
         session = nil
         cameraController = nil
         latestPrediction = nil
-        capturedImage = nil
+        finalDecision = nil
         errorMessage = nil
     }
 
+    /// The single channel for everything the camera reports, delivered on
+    /// the main actor.
     private func handleCapturEvent(_ event: CapturEvents) {
         switch event {
         case .prediction(let prediction):
+            // Per-frame inference while the user frames the photo.
             latestPrediction = prediction
 
-        case .finalDecision(let finalDecision):
-            latestPrediction = finalDecision.prediction
-
-            guard let image = UIImage(data: finalDecision.imageData) else {
-                errorMessage = "The captured image could not be decoded."
-                return
-            }
-
-            capturedImage = image
+        case .finalDecision(let decision):
+            // Capture complete — manual shutter, timeout, or a run of
+            // consistently good frames (see decision.trigger).
+            finalDecision = decision
 
         case .failed(let error):
             errorMessage = error.localizedDescription

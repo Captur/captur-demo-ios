@@ -44,7 +44,7 @@ struct CameraExperienceView: View {
                         CapturedImageView(
                             image: UIImage(data: finalDecision.imageData),
                             errorMessage: model.errorMessage,
-                            onNewSession: model.resetSession,
+                            onNewSession: { Task { await model.resetSession() } },
                             onRetake: model.retake
                         )
                     }
@@ -53,7 +53,7 @@ struct CameraExperienceView: View {
             .overlay(alignment: .topTrailing) {
                 if model.finalDecision == nil {
                     Button {
-                        model.resetSession()
+                        Task { await model.resetSession() }
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .font(.largeTitle)

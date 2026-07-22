@@ -140,16 +140,18 @@ final class CapturDemoModel: ObservableObject {
         }
     }
 
-    /// Back to the start. Removing `CapturCameraScreen` from the view
-    /// hierarchy is what closes the camera and its session (the SDK has no
-    /// close() call); dropping our references here just mirrors that. The
-    /// next attempt starts over with a fresh session.
-    func resetSession() {
+    /// Back to the start. Clearing `cameraController` unmounts
+    /// `CapturCameraScreen`, and since SDK 0.2.0 the client must also call
+    /// `close()` on the controller to finish cleanup — dismounting alone is
+    /// no longer enough. The next attempt starts over with a fresh session.
+    func resetSession() async {
+        let controller = cameraController
         session = nil
         cameraController = nil
         latestPrediction = nil
         finalDecision = nil
         errorMessage = nil
+        await controller?.close()
     }
 
     /// The single channel for everything the camera reports, delivered on

@@ -65,7 +65,7 @@ struct ContentView: View {
         // unmounted camera closes its session.
         .fullScreenCover(isPresented: Binding(
             get: { demo.cameraController != nil },
-            set: { if !$0 { demo.resetSession() } }
+            set: { if !$0 { Task { await demo.resetSession() } } }
         )) {
             CameraExperienceView(model: demo)
         }

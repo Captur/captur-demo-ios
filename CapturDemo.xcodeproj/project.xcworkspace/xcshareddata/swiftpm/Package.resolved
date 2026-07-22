@@ -6,8 +6,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://gitlab.development.captur.ai/Captur/captur-mobile-sdk-ios",
       "state" : {
-        "revision" : "b4094257c22d68d85d67f7298bcaee6aa2e51d0d",
-        "version" : "0.1.0"
+        "revision" : "522b62f5e8ff25ae4a4e197765acf3057208f25f",
+        "version" : "0.2.0"
       }
     }
   ],

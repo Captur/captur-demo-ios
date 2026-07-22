@@ -350,7 +350,7 @@
 			repositoryURL = "https://gitlab.development.captur.ai/Captur/captur-mobile-sdk-ios";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.1.0;
+				minimumVersion = 0.2.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

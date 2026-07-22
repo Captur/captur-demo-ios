@@ -21,7 +21,7 @@ The application uses CapturSDK as a Swift Package Manager package hosted at:
 https://gitlab.development.captur.ai/Captur/captur-mobile-sdk-ios
 ```
 
-The package exposes the `CapturSDK` library. The version currently recorded in `Package.resolved` is `0.1.0`. Read the version at runtime with `CapturSDKMetadata.version` — the app shows it at the bottom of the start screen.
+The package exposes the `CapturSDK` library. The version currently recorded in `Package.resolved` is `0.2.0`. Read the version at runtime with `CapturSDKMetadata.version` — the app shows it at the bottom of the start screen.
 
 Because both the Swift package repository and its binary artifact are private, GitLab credentials must be available before Xcode resolves the package.
 
@@ -59,7 +59,7 @@ Do not commit a real API key. As the application grows, the API key should be su
 2. **Prepare Session** — `captur.prepareSession(policyType:location:)`. Authenticates with the API key and downloads the policy model; the heaviest call, so the UI shows a spinner.
 3. **Open Camera** — `session.prepareCamera(location:onCapturEvent:)` loads the models and returns a camera controller; the camera screen presents itself as soon as the controller exists. The app requests camera permission first — the SDK checks it but never prompts.
 4. **Capture** — live predictions render at the bottom of the camera. Capture manually with the shutter, or let the SDK finalize on its own after a run of consistently good frames or a timeout. The camera controls (torch, front/back, lens, zoom) call straight into the controller.
-5. **Result** — the final decision carries the JPEG; the app shows it framed with **New Session** and **Retake**. Retake resumes the still-open camera; New Session dismisses it, which closes the session — each new attempt starts with a fresh one. Persisting or uploading the image is the app's responsibility, not the SDK's.
+5. **Result** — the final decision carries the JPEG; the app shows it framed with **New Session** and **Retake**. Retake resumes the still-open camera; New Session dismisses the camera screen and calls `controller.close()` — since SDK 0.2.0, clients must call `close()` in addition to removing `CapturCameraScreen` from the hierarchy. Each new attempt starts with a fresh session. Persisting or uploading the image is the app's responsibility, not the SDK's.
 
 All CapturSDK lifecycle code lives in `CapturDemoModel.swift`. The integration itself remains a handful of small calls:
 
@@ -77,6 +77,7 @@ cameraController = try await session.prepareCamera(location: useCase.demoLocatio
 
 try await cameraController.captureImage()
 try cameraController.retake()
+await cameraController.close()
 ```
 
 ## Project structure

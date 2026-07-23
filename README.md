@@ -59,7 +59,7 @@ Never commit the token or the `.netrc` file to this repository.
 4. **Capture** — live predictions render at the bottom of the camera. Capture manually with the shutter, or let the SDK finalize on its own after a run of consistently good frames or a timeout. The camera controls (torch, front/back, lens, zoom) call straight into the controller.
 5. **Result** — the final decision carries the JPEG; the app shows it framed with **New Session** and **Retake**. Retake resumes the still-open camera. New Session ends the flow: it calls `controller.close()`, which closes the session — the only place the demo does. Each new attempt starts with a fresh session. Persisting or uploading the image is the app's responsibility, not the SDK's.
 
-Closing the camera and closing the session are separate in SDK 0.2.0: the X on the camera screen only hides the camera — the controller stays alive and the session still counts it as its active camera (a session allows one camera at a time; preparing a second throws `cameraAlreadyActive`). The Open Camera button becomes **Resume Camera** and re-presents the same controller.
+For deterministic teardown, call await cameraController.close() from the host's definite completion or cancellation action. The call returns after camera shutdown. This is done in order to free resources and cleanup.
 
 All CapturSDK lifecycle code lives in `CapturDemoModel.swift`. The integration itself remains a handful of small calls:
 

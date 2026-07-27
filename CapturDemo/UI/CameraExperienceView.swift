@@ -12,42 +12,39 @@ struct CameraExperienceView: View {
 
     var body: some View {
         if let cameraController = model.cameraController {
-            GeometryReader { geometry in
-                ZStack {
-                    CapturCameraScreen(capturCameraController: cameraController)
-                        .ignoresSafeArea()
+            ZStack {
+                CapturCameraScreen(capturCameraController: cameraController)
+                    .ignoresSafeArea()
 
-                    VStack(spacing: 12) {
-                        if let errorMessage = model.errorMessage {
-                            Text(errorMessage)
-                                .foregroundStyle(.white)
-                                .padding()
-                                .background(Color.capturCrimson.opacity(0.85), in: RoundedRectangle(cornerRadius: 16))
-                        }
-
-                        Spacer()
-
-                        // Prediction sits at the bottom, kept compact so the
-                        // camera preview stays unobstructed.
-                        if let prediction = model.latestPrediction {
-                            PredictionView(prediction: prediction)
-                                .frame(width: geometry.size.width * 0.9)
-                        }
-
-                        if model.finalDecision == nil {
-                            CameraControlsView(model: model)
-                        }
+                VStack(spacing: 12) {
+                    if let errorMessage = model.errorMessage {
+                        Text(errorMessage)
+                            .foregroundStyle(.white)
+                            .padding()
+                            .background(Color.capturCrimson.opacity(0.85), in: RoundedRectangle(cornerRadius: 16))
                     }
-                    .padding()
 
-                    if let finalDecision = model.finalDecision {
-                        CapturedImageView(
-                            image: UIImage(data: finalDecision.imageData),
-                            errorMessage: model.errorMessage,
-                            onNewSession: { Task { await model.closeSession() } },
-                            onRetake: model.retake
-                        )
+                    Spacer()
+
+                    // Only the decision's reason code is surfaced to the user;
+                    // per-label output is not shown (and leaves the SDK in 0.3.0).
+                    if let prediction = model.latestPrediction {
+                        PredictionView(prediction: prediction)
                     }
+
+                    if model.finalDecision == nil {
+                        CameraControlsView(model: model)
+                    }
+                }
+                .padding()
+
+                if let finalDecision = model.finalDecision {
+                    CapturedImageView(
+                        image: UIImage(data: finalDecision.imageData),
+                        errorMessage: model.errorMessage,
+                        onNewSession: { Task { await model.closeSession() } },
+                        onRetake: model.retake
+                    )
                 }
             }
             .overlay(alignment: .topTrailing) {
@@ -72,24 +69,13 @@ private struct PredictionView: View {
     let prediction: CapturPrediction
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if let decision = prediction.decision {
-                Text(decision.title ?? decision.value)
-                    .font(.capturHeading(12, relativeTo: .caption))
-            }
-
-            ForEach(prediction.labels, id: \.name) { label in
-                HStack {
-                    Text(label.name)
-                    Spacer(minLength: 12)
-                    Text(label.confidence, format: .percent.precision(.fractionLength(0)))
-                }
-                .font(.capturBody(11, relativeTo: .caption2))
-            }
+        if let reasonCode = prediction.decision?.reasonCode {
+            Text("Reason code: " + reasonCode)
+                .font(.capturHeading(12, relativeTo: .caption))
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(.ultraThinMaterial, in: Capsule())
         }
-        .padding(10)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 

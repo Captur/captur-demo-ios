@@ -1,13 +1,13 @@
 {
-  "originHash" : "4d4eda5c4bafe89bd6d0415f30a5d1f629e7b83a2f5e9d49f174726bb3a1840f",
+  "originHash" : "fd4930ba9a367bfe99fc54468617709df4666509805759a873d38c3392deb1ca",
   "pins" : [
     {
-      "identity" : "captur-mobile-sdk-ios",
+      "identity" : "captur-mobile-ios-sdk",
       "kind" : "remoteSourceControl",
-      "location" : "https://gitlab.development.captur.ai/Captur/captur-mobile-sdk-ios",
+      "location" : "https://gitlab-regional.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git",
       "state" : {
-        "revision" : "522b62f5e8ff25ae4a4e197765acf3057208f25f",
-        "version" : "0.2.0"
+        "revision" : "b364ee904f90479ffd1879ab5351685dc986dfee",
+        "version" : "0.3.0"
       }
     }
   ],

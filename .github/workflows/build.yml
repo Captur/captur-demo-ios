@@ -22,7 +22,7 @@ jobs:
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
       GITLAB_HOST: gitlab-regional.development.captur.ai
-      GITLAB_USERNAME: captur-demo-apps-mobile-sdk-g1
+      GITLAB_USERNAME: ahdtest-mobile-sdk-g1
 
     steps:
       - name: Check out repository

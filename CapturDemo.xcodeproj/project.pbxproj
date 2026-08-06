@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		ECA33E02300E76EF0076E001 /* CapturSDK in Frameworks */ = {isa = PBXBuildFile; productRef = ECA33E01300E76EF0076E001 /* CapturSDK */; };
+		EC6EFA76302244A600E78DC3 /* CapturSDK in Frameworks */ = {isa = PBXBuildFile; productRef = EC6EFA75302244A600E78DC3 /* CapturSDK */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,7 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				ECA33E02300E76EF0076E001 /* CapturSDK in Frameworks */,
+				EC6EFA76302244A600E78DC3 /* CapturSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +70,7 @@
 			);
 			name = CapturDemo;
 			packageProductDependencies = (
-				ECA33E01300E76EF0076E001 /* CapturSDK */,
+				EC6EFA75302244A600E78DC3 /* CapturSDK */,
 			);
 			productName = CapturDemo;
 			productReference = ECA33DE6300E74240076E001 /* CapturDemo.app */;
@@ -101,7 +101,7 @@
 			mainGroup = ECA33DDD300E74240076E001;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				ECA33E00300E76EF0076E001 /* XCRemoteSwiftPackageReference "captur-mobile-sdk-ios" */,
+				EC6EFA74302244A600E78DC3 /* XCRemoteSwiftPackageReference "captur-mobile-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ECA33DE7300E74240076E001 /* Products */;
@@ -345,20 +345,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		ECA33E00300E76EF0076E001 /* XCRemoteSwiftPackageReference "captur-mobile-sdk-ios" */ = {
+		EC6EFA74302244A600E78DC3 /* XCRemoteSwiftPackageReference "captur-mobile-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://gitlab.development.captur.ai/Captur/captur-mobile-sdk-ios";
+			repositoryURL = "https://gitlab-regional.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 0.2.0;
+				minimumVersion = 0.3.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		ECA33E01300E76EF0076E001 /* CapturSDK */ = {
+		EC6EFA75302244A600E78DC3 /* CapturSDK */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = ECA33E00300E76EF0076E001 /* XCRemoteSwiftPackageReference "captur-mobile-sdk-ios" */;
+			package = EC6EFA74302244A600E78DC3 /* XCRemoteSwiftPackageReference "captur-mobile-ios-sdk" */;
 			productName = CapturSDK;
 		};
 /* End XCSwiftPackageProductDependency section */

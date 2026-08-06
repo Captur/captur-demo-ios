@@ -76,15 +76,10 @@ private struct PredictionView: View {
             if let decision = prediction.decision {
                 Text(decision.title ?? decision.value)
                     .font(.capturHeading(12, relativeTo: .caption))
-            }
-
-            ForEach(prediction.labels, id: \.name) { label in
-                HStack {
-                    Text(label.name)
-                    Spacer(minLength: 12)
-                    Text(label.confidence, format: .percent.precision(.fractionLength(0)))
+                if let reasonCode = decision.reasonCode {
+                    Text(reasonCode)
+                        .font(.capturBody(11, relativeTo: .caption2))
                 }
-                .font(.capturBody(11, relativeTo: .caption2))
             }
         }
         .padding(10)

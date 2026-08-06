@@ -30,7 +30,7 @@ Create or update `~/.netrc` with credentials that can access the private reposit
 ```text
 machine gitlab-regional.development.captur.ai
   login <your-username>
-  password <gitlab-access-token>
+  password <gitlab-password>
 ```
 
 Restrict access to the file:

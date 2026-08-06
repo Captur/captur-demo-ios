@@ -37,6 +37,11 @@ final class CapturDemoModel: ObservableObject {
     /// the policy model), so the UI shows a spinner for it.
     @Published private(set) var isPreparingSession = false
 
+    /// When true, the camera is prepared with auto-capture disabled
+    /// (`CapturCameraConfiguration.disableAuto`, SDK 0.3.0+): the SDK never
+    /// finalizes on its own and only the manual shutter ends the capture.
+    @Published var isAutoCaptureDisabled = false
+
     /// Whether the camera screen is on screen. Separate from
     /// `cameraController`: dismissing the camera keeps the controller alive
     /// so the same camera can be resumed later.
@@ -82,7 +87,8 @@ final class CapturDemoModel: ObservableObject {
 
         do {
             cameraController = try await session.prepareCamera(
-                location: useCase.demoLocation
+                location: useCase.demoLocation,
+                configuration: CapturCameraConfiguration(disableAuto: isAutoCaptureDisabled)
             ) { [weak self] event in
                 self?.handleCapturEvent(event)
             }

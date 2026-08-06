@@ -35,6 +35,11 @@ struct ContentView: View {
                 successLabel("Session Prepared")
 
                 if demo.cameraController == nil {
+                    // Applies to the next prepareCamera call — with auto-capture
+                    // off, only the manual shutter finalizes.
+                    Toggle("Disable auto-capture", isOn: $demo.isAutoCaptureDisabled)
+                        .fixedSize()
+
                     // prepareCamera is the SDK call; the camera screen
                     // presents itself once a controller exists.
                     Button("Open Camera") {

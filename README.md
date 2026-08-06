@@ -18,7 +18,7 @@ The app mimics real use cases — verifying an **e-bike or e-scooter is parked c
 The application uses CapturSDK as a Swift Package Manager package hosted at:
 
 ```text
-https://gitlab.development.captur.ai/Captur/captur-mobile-sdk-ios
+https://gitlab-regional.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git
 ```
 
 The package exposes the `CapturSDK` library. The version currently recorded in `Package.resolved` is `0.3.0`. Read the version at runtime with `CapturSDKMetadata.version` — the app shows it at the bottom of the start screen.
@@ -30,8 +30,8 @@ Because both the Swift package repository and its binary artifact are private, G
 Create or update `~/.netrc` with credentials that can access the private repository and package registry:
 
 ```text
-machine gitlab.development.captur.ai
-  login CapturDemo
+machine gitlab-regional.development.captur.ai
+  login <your-username>
   password <gitlab-access-token>
 ```
 
@@ -101,7 +101,7 @@ GitLab authentication comes from one repository secret, configured under **Setti
 
 | Secret | Purpose |
 | --- | --- |
-| `CAPTUR_GITLAB_ACCESS_TOKEN` | Reads the private SDK repository and downloads its binary artifact |
+| `CAPTUR_REGIONAL_GITLAB_TOKEN` | Reads the private SDK repository and downloads its binary artifact |
 
 The workflow writes the token to a temporary `~/.netrc` on the runner and removes it at the end of the job, including after a failure. No API key is needed on CI — the app is built, not run.
 

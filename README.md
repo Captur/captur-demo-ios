@@ -21,8 +21,6 @@ The application uses CapturSDK as a Swift Package Manager package hosted at:
 https://gitlab-regional.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git
 ```
 
-The package exposes the `CapturSDK` library. The version currently recorded in `Package.resolved` is `0.3.0`. Read the version at runtime with `CapturSDKMetadata.version` — the app shows it at the bottom of the start screen.
-
 Because both the Swift package repository and its binary artifact are private, GitLab credentials must be available before Xcode resolves the package.
 
 ### Configure local GitLab authentication

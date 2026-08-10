@@ -60,7 +60,8 @@ final class CapturDemoModel: ObservableObject {
         do {
             session = try await captur.prepareSession(
                 policyType: useCase.policyType,
-                location: useCase.demoLocation
+                location: useCase.demoLocation,
+                reference: UUID().uuidString
             )
         } catch {
             errorMessage = error.localizedDescription

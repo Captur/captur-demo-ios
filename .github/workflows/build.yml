@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 30
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
-      GITLAB_HOST: gitlab-regional.development.captur.ai
+      GITLAB_HOST: gitlab.development.captur.ai
       GITLAB_USERNAME: captur-demo-apps-mobile-sdk-g1
 
     steps:

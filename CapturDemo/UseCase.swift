@@ -7,9 +7,10 @@
 
 import CapturSDK
 
-/// The two demo use cases, one per policy type bundled with CapturSDK 0.1.0.
+/// The demo use cases, one per policy type bundled with the CapturSDK.
 enum UseCase: String, CaseIterable, Identifiable {
     case eBikeParking
+    case eScooterParking
     case packageDelivery
 
     var id: String { rawValue }
@@ -17,6 +18,7 @@ enum UseCase: String, CaseIterable, Identifiable {
     var title: String {
         switch self {
         case .eBikeParking: return "E-bike parking"
+        case .eScooterParking: return "E-scooter parking"
         case .packageDelivery: return "Package delivery"
         }
     }
@@ -25,6 +27,7 @@ enum UseCase: String, CaseIterable, Identifiable {
     var policyType: String {
         switch self {
         case .eBikeParking: return "eBike"
+        case .eScooterParking: return "eScooter"
         case .packageDelivery: return "package"
         }
     }
@@ -34,6 +37,8 @@ enum UseCase: String, CaseIterable, Identifiable {
         switch self {
         case .eBikeParking:
             return CapturLocation(latitude: 51.5074, longitude: -0.1278) // London
+        case .eScooterParking:
+            return CapturLocation(latitude: 48.8566, longitude: 2.3522) // Paris
         case .packageDelivery:
             return CapturLocation(latitude: 43.6532, longitude: -79.3832) // Toronto
         }

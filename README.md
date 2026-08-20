@@ -46,7 +46,15 @@ Never commit the token or the `.netrc` file to this repository.
 1. Configure GitLab authentication as described above.
 2. Open `CapturDemo.xcodeproj` in Xcode.
 3. Allow Xcode to resolve the Swift package dependency.
-4. Paste your API key into `CapturDemo/CapturConfig.swift`.
+4. Create `CapturDemo/Secrets.env` (gitignored — real keys never reach source
+   control) containing your API key:
+
+   ```sh
+   echo 'CAPTUR_API_KEY=your-api-key' > CapturDemo/Secrets.env
+   ```
+
+   Without the file the app still builds and runs; preparing a session fails
+   with an authentication error.
 5. Select a device and run the `CapturDemo` scheme.
 
 ## The demo flow
@@ -85,7 +93,7 @@ await cameraController.close()
 | --- | --- |
 | `CapturDemo/CapturDemoApp.swift` | Application entry point |
 | `CapturDemo/CapturDemoModel.swift` | CapturSDK lifecycle and event handling |
-| `CapturDemo/CapturConfig.swift` | API key configuration |
+| `CapturDemo/CapturConfig.swift` | Reads the API key from the gitignored `Secrets.env` |
 | `CapturDemo/UseCase.swift` | The demo use cases (policy type, location) |
 | `CapturDemo/UI/ContentView.swift` | Use-case picker and the two preparation steps |
 | `CapturDemo/UI/CameraExperienceView.swift` | Camera, live reason code, and the captured result |

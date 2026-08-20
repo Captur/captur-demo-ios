@@ -1,0 +1,9 @@
+# Secrets — never commit real API keys
+CapturDemo/Secrets.env
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+
+# macOS
+.DS_Store

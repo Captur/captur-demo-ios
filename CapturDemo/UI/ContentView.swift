@@ -35,8 +35,9 @@ struct ContentView: View {
                 successLabel("Session Prepared")
 
                 if demo.cameraController == nil {
-                    // Applies to the next prepareCamera call — with auto-capture
-                    // off, only the manual shutter finalizes.
+                    // Applies to the next prepareCamera call — stops consecutive
+                    // good frames from auto-finishing the capture (the shutter
+                    // and the SDK timeout still do).
                     Toggle("Disable auto-capture", isOn: $demo.isAutoCaptureDisabled)
                         .fixedSize()
 

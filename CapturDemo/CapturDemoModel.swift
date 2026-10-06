@@ -38,8 +38,9 @@ final class CapturDemoModel: ObservableObject {
     @Published private(set) var isPreparingSession = false
 
     /// When true, the camera is prepared with auto-capture disabled
-    /// (`CapturCameraConfiguration.disableAuto`, SDK 0.3.0+): the SDK never
-    /// finalizes on its own and only the manual shutter ends the capture.
+    /// (`CapturCameraConfiguration.disableAuto`): consecutive good frames no
+    /// longer finish the capture automatically. The manual shutter and the
+    /// SDK-managed timeout still do.
     @Published var isAutoCaptureDisabled = false
 
     /// Whether the camera screen is on screen. Separate from

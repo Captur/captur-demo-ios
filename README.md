@@ -10,7 +10,8 @@ The app mimics real use cases — verifying an **e-bike or e-scooter is parked c
 - iOS 15.0 or later (the app's deployment target)
 - A physical iPhone for the full flow (the simulator has no camera; the app still builds and runs)
 - Access to the private Captur GitLab instance
-- A GitLab token that can read the SDK repository and its package artifacts
+- A GitLab personal access token that can read the SDK repository and its package artifacts
+- An Apple ID on the Captur developer team, to sign the app for a physical device
 - A Captur API key for runtime SDK use
 
 ## SDK dependency
@@ -18,19 +19,29 @@ The app mimics real use cases — verifying an **e-bike or e-scooter is parked c
 The application uses CapturSDK as a Swift Package Manager package hosted at:
 
 ```text
-https://gitlab-regional.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git
+https://gitlab.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git
 ```
 
 Because both the Swift package repository and its binary artifact are private, GitLab credentials must be available before Xcode resolves the package.
 
+`gitlab.development.captur.ai` is a separate GitLab instance from `gitlab.captur.ai`, with its own accounts. Credentials for one do not work on the other.
+
 ### Configure local GitLab authentication
 
-Create or update `~/.netrc` with credentials that can access the private repository and package registry:
+Create a personal access token with the `read_repository` and `read_api` scopes at:
 
 ```text
-machine gitlab-regional.development.captur.ai
+https://gitlab.development.captur.ai/-/user_settings/personal_access_tokens
+```
+
+An account password is not enough: it can clone the repository, but the package registry that serves the binary artifact only accepts a token.
+
+Create or update `~/.netrc` with the token:
+
+```text
+machine gitlab.development.captur.ai
   login <your-username>
-  password <gitlab-password>
+  password <personal-access-token>
 ```
 
 Restrict access to the file:
@@ -55,7 +66,22 @@ Never commit the token or the `.netrc` file to this repository.
 
    Without the file the app still builds and runs; preparing a session fails
    with an authentication error.
-5. Select a device and run the `CapturDemo` scheme.
+5. To run on a physical iPhone, set up code signing as described below.
+6. Select a device and run the `CapturDemo` scheme.
+
+### Code signing
+
+The project signs automatically with the Captur developer team and the bundle identifier `captur.ai.CapturDemo`. Add an Apple ID that belongs to that team under **Xcode → Settings → Accounts**; Xcode then creates the certificate and provisioning profile on the first device build.
+
+Without access to the Captur team, select your own team and a unique bundle identifier under **Signing & Capabilities** for the `CapturDemo` target. Do not commit that change.
+
+### Troubleshooting
+
+| Error | Cause |
+| --- | --- |
+| `could not read Username for 'https://gitlab.development.captur.ai': terminal prompts disabled` | `~/.netrc` has no entry for `gitlab.development.captur.ai`, or the entry's credentials are rejected |
+| `failed downloading '…/CapturSDK.xcframework.zip' … badResponseStatusCode(401)` | The `~/.netrc` entry holds an account password instead of a personal access token |
+| `No profiles for 'captur.ai.CapturDemo' were found` | No Apple ID on the Captur developer team is signed in to Xcode |
 
 ## The demo flow
 

@@ -71,9 +71,27 @@ Never commit the token or the `.netrc` file to this repository.
 
 ### Code signing
 
-The project signs automatically with the Captur developer team and the bundle identifier `captur.ai.CapturDemo`. Add an Apple ID that belongs to that team under **Xcode → Settings → Accounts**; Xcode then creates the certificate and provisioning profile on the first device build.
+The project deliberately ships with no development team and no bundle
+identifier: every cloner sets their own under **Signing & Capabilities** for
+the `CapturDemo` target before the first device build.
 
-Without access to the Captur team, select your own team and a unique bundle identifier under **Signing & Capabilities** for the `CapturDemo` target. Do not commit that change.
+- **Team** — if your Apple ID belongs to the Captur developer team, add it
+  under **Xcode → Settings → Accounts** and select it. Otherwise select your
+  own team; a free personal team works for device builds (apps expire after
+  7 days and need re-installing from Xcode).
+- **Bundle identifier — you must invent a unique one.** Bundle identifiers
+  are globally unique across *all* Apple developer accounts, first come,
+  first served, forever. If any team anywhere has already registered the
+  string you pick, the build fails with "could not be registered to your
+  development team" — which is why obvious choices often fail while a novel
+  string works. Namespace it to yourself (for example
+  `com.<yourname>.CapturDemo`) and keep reusing the same one: each new
+  identifier is claimed permanently on first use, and free personal teams
+  can only register about ten new ones per week. Members of the Captur team
+  can use the already-registered `captur.ai.CapturDemo`.
+
+Xcode creates the certificate and provisioning profile on the first device
+build. Do not commit your team or bundle identifier.
 
 ### Troubleshooting
 

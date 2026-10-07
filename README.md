@@ -48,17 +48,29 @@ package registry that serves the binary artifact only accepts a token.
 
 ### 3. Store the token in ~/.netrc
 
-Create or update `~/.netrc` with the token, then restrict access to the file:
+`~/.netrc` lives in your home directory, so the commands below work from any
+folder — and the file is per machine and per user: create it on each Mac that
+will run Xcode. Append this block (creating the file if needed), replacing
+both placeholders with your real GitLab username and the token itself (tokens
+look like `glpat-…`; no angle brackets, no quotes), then restrict access:
 
-```text
+```sh
+cat >> ~/.netrc <<'EOF'
 machine gitlab.development.captur.ai
   login <your-username>
   password <personal-access-token>
-```
-
-```sh
+EOF
 chmod 600 ~/.netrc
 ```
+
+Verify it works before involving Xcode — this must print `200`:
+
+```sh
+curl -n -s -o /dev/null -w "%{http_code}\n" https://gitlab.development.captur.ai/api/v4/projects
+```
+
+(`-n` tells curl to use `~/.netrc`, the same way Xcode will. A `401` means
+the username or token is wrong; see the troubleshooting table.)
 
 Never commit the token or the `~/.netrc` file to this repository.
 
@@ -66,7 +78,9 @@ Never commit the token or the `~/.netrc` file to this repository.
 
 Open `CapturDemo.xcodeproj` in Xcode and let it resolve the Swift package
 dependency — resolution uses the `~/.netrc` credentials from the previous
-step, for both the repository and the binary artifact download.
+step, for both the repository and the binary artifact download. If Xcode
+already tried and failed before the credentials existed, retry with
+**File → Packages → Resolve Package Versions**.
 
 ### 5. Add your Captur API key
 

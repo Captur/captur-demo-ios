@@ -6,10 +6,6 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		E73034C13029F25600A6918A /* CapturSDK in Frameworks */ = {isa = PBXBuildFile; productRef = E73034C03029F25600A6918A /* CapturSDK */; };
-/* End PBXBuildFile section */
-
 /* Begin PBXFileReference section */
 		ECA33DE6300E74240076E001 /* CapturDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CapturDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -27,7 +23,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E73034C13029F25600A6918A /* CapturSDK in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -70,7 +65,6 @@
 			);
 			name = CapturDemo;
 			packageProductDependencies = (
-				E73034C03029F25600A6918A /* CapturSDK */,
 			);
 			productName = CapturDemo;
 			productReference = ECA33DE6300E74240076E001 /* CapturDemo.app */;
@@ -101,7 +95,6 @@
 			mainGroup = ECA33DDD300E74240076E001;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				E73034BF3029F25600A6918A /* XCRemoteSwiftPackageReference "captur-mobile-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = ECA33DE7300E74240076E001 /* Products */;
@@ -262,7 +255,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 5W9MZVL4FY;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is required";
@@ -276,7 +269,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = captur.ai.CapturDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -295,7 +287,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 5W9MZVL4FY;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access is required";
@@ -309,7 +301,6 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = captur.ai.CapturDemo;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -343,25 +334,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		E73034BF3029F25600A6918A /* XCRemoteSwiftPackageReference "captur-mobile-ios-sdk" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://gitlab.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git";
-			requirement = {
-				kind = exactVersion;
-				version = 0.6.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		E73034C03029F25600A6918A /* CapturSDK */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = E73034BF3029F25600A6918A /* XCRemoteSwiftPackageReference "captur-mobile-ios-sdk" */;
-			productName = CapturSDK;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = ECA33DDE300E74240076E001 /* Project object */;
 }

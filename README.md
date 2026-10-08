@@ -6,52 +6,93 @@ The app mimics real use cases — verifying an **e-bike or e-scooter is parked c
 
 ## Requirements
 
-- macOS with Xcode 26.6 or a compatible version
-- iOS 15.0 or later (the app's deployment target)
-- A physical iPhone for the full flow (the simulator has no camera; the app still builds and runs)
-- Access to the private Captur GitLab instance
-- A GitLab personal access token that can read the SDK repository and its package artifacts
-- A Captur API key for runtime SDK use
+In the order you will need them:
 
-## SDK dependency
+1. A GitLab personal access token that can read the SDK repository and its package artifacts
+2. macOS with Xcode 26.6 or a compatible version
+3. A Captur API key for runtime SDK use
+4. A physical iPhone running iOS 15.0 or later for the full flow (the simulator has no camera; the app still builds and runs)
 
-The application uses CapturSDK as a Swift Package Manager package hosted at:
+## Getting started
 
-```text
-https://gitlab.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git
-```
+The steps below are in strict order: Xcode tries to resolve the SDK the moment
+the project opens, so the GitLab credentials must exist first.
 
-Because both the Swift package repository and its binary artifact are private, GitLab credentials must be available before Xcode resolves the package.
+### 1. Store the token in ~/.netrc
 
-`gitlab.development.captur.ai` is a separate GitLab instance from `gitlab.captur.ai`, with its own accounts. Credentials for one do not work on the other.
+`~/.netrc` lives in your home directory, so the commands below work from any
+folder — and the file is per machine and per user: create it on each Mac that
+will run Xcode. Append this block (creating the file if needed), replacing
+both placeholders with your real GitLab username and the token itself, then restrict access:
 
-### Configure local GitLab authentication
-
-Create a personal access token with the `read_repository` and `read_api` scopes at:
-
-```text
-https://gitlab.development.captur.ai/-/user_settings/personal_access_tokens
-```
-
-An account password is not enough: it can clone the repository, but the package registry that serves the binary artifact only accepts a token.
-
-Create or update `~/.netrc` with the token:
-
-```text
+```sh
+cat >> ~/.netrc <<'EOF'
 machine gitlab.development.captur.ai
   login <your-username>
   password <personal-access-token>
-```
-
-Restrict access to the file:
-
-```sh
+EOF
 chmod 600 ~/.netrc
 ```
 
-Never commit the token or the `.netrc` file to this repository.
+Verify it works before involving Xcode — this must print `200`:
 
-## Running the application
+```sh
+curl -n -s -o /dev/null -w "%{http_code}\n" https://gitlab.development.captur.ai/api/v4/projects
+```
+
+(`-n` tells curl to use `~/.netrc`, the same way Xcode will. A `401` means
+the username or token is wrong; see the troubleshooting table.)
+
+Never commit the token or the `~/.netrc` file to this repository.
+
+### 2. Open the project and resolve the SDK
+
+Open `CapturDemo.xcodeproj` in Xcode and manually add the Swift package
+dependency — resolution uses the `~/.netrc` credentials from the previous
+step, for both the repository and the binary artifact download. 
+
+Use this link to resolve the package:
+```text
+https://gitlab.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git
+```
+If Xcode already tried and failed before the credentials existed, retry with
+**File → Packages → Resolve Package Versions** or alternatively remove the package from the list of
+dependancies and try again.
+
+### 3. Add your Captur API key
+
+Create `CapturDemo/Secrets.env` (gitignored — real keys never reach source
+control) containing your API key:
+
+```sh
+echo 'CAPTUR_API_KEY=your-api-key' > CapturDemo/Secrets.env
+```
+
+Without the file the app still builds and runs; preparing a session fails
+with an authentication error.
+
+### 4. Code signing
+
+The project deliberately ships with no development team and no bundle
+identifier: every cloner sets their own under **Signing & Capabilities** for
+the `CapturDemo` target before the first device build.
+
+- **Team** — Select your own team; a free personal team works for device builds
+ (apps expire after 7 days and need re-installing from Xcode).
+- **Bundle identifier — you must invent a unique one.** Bundle identifiers
+  are globally unique across *all* Apple developer accounts, first come,
+  first served, forever. If any team anywhere has already registered the
+  string you pick, the build fails with "could not be registered to your
+  development team" — which is why obvious choices often fail while a novel
+  string works. Namespace it to yourself (for example
+  `com.<yourname>.<yourcompany>.CapturDemo`) and keep reusing the same one: each new
+  identifier is claimed permanently on first use, and free personal teams
+  can only register about ten new ones per week.
+
+Xcode creates the certificate and provisioning profile on the first device
+build. Do not commit your team or bundle identifier.
+
+## 5. Running the application (recap)
 
 1. Configure GitLab authentication as described above.
 2. Open `CapturDemo.xcodeproj` in Xcode.
@@ -68,29 +109,6 @@ Never commit the token or the `.netrc` file to this repository.
 5. To run on a physical iPhone, set up code signing as described below.
 6. Select a device and run the `CapturDemo` scheme.
 
-### Code signing
-
-The project deliberately ships with no development team and no bundle
-identifier: every cloner sets their own under **Signing & Capabilities** for
-the `CapturDemo` target before the first device build.
-
-- **Team** — if your Apple ID belongs to the Captur developer team, add it
-  under **Xcode → Settings → Accounts** and select it. Otherwise select your
-  own team; a free personal team works for device builds (apps expire after
-  7 days and need re-installing from Xcode).
-- **Bundle identifier — you must invent a unique one.** Bundle identifiers
-  are globally unique across *all* Apple developer accounts, first come,
-  first served, forever. If any team anywhere has already registered the
-  string you pick, the build fails with "could not be registered to your
-  development team" — which is why obvious choices often fail while a novel
-  string works. Namespace it to yourself (for example
-  `com.<yourname>.CapturDemo`) and keep reusing the same one: each new
-  identifier is claimed permanently on first use, and free personal teams
-  can only register about ten new ones per week. Members of the Captur team
-  can use the already-registered `captur.ai.CapturDemo`.
-
-Xcode creates the certificate and provisioning profile on the first device
-build. Do not commit your team or bundle identifier.
 
 ### Troubleshooting
 
@@ -98,7 +116,7 @@ build. Do not commit your team or bundle identifier.
 | --- | --- |
 | `could not read Username for 'https://gitlab.development.captur.ai': terminal prompts disabled` | `~/.netrc` has no entry for `gitlab.development.captur.ai`, or the entry's credentials are rejected |
 | `failed downloading '…/CapturSDK.xcframework.zip' … badResponseStatusCode(401)` | The `~/.netrc` entry holds an account password instead of a personal access token |
-| `No profiles for 'captur.ai.CapturDemo' were found` | No Apple ID on the Captur developer team is signed in to Xcode |
+| `Failed Registering Bundle Identifier The app identifier "test" cannot be registered to your development team because it is not available. Change your bundle identifier to a unique string to try again.` | The specific bundle identifier you picked was already taken|
 
 ## The demo flow
 
@@ -144,15 +162,3 @@ await cameraController.close()
 | `CapturDemo/UI/CapturTheme.swift` | Brand colors, fonts, and button style (fonts in `UI/Fonts/`) |
 | `CapturDemo.xcodeproj` | Xcode application and Swift package configuration |
 | `.github/workflows/build.yml` | GitHub Actions build workflow |
-
-## Continuous integration
-
-GitLab authentication comes from one repository secret, configured under **Settings → Secrets and variables → Actions**:
-
-| Secret | Purpose |
-| --- | --- |
-| `CAPTUR_REGIONAL_GITLAB_TOKEN` | Reads the private SDK repository and downloads its binary artifact |
-
-The workflow writes the token to a temporary `~/.netrc` on the runner and removes it at the end of the job, including after a failure. No API key is needed on CI — the app is built, not run.
-
-If CI fails: check that the secret is configured and its token can read the SDK repository and package artifact, and that `Package.resolved` is committed and points to an available SDK release.

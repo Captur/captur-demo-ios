@@ -11,7 +11,6 @@ The app mimics real use cases — verifying an **e-bike or e-scooter is parked c
 - A physical iPhone for the full flow (the simulator has no camera; the app still builds and runs)
 - Access to the private Captur GitLab instance
 - A GitLab personal access token that can read the SDK repository and its package artifacts
-- An Apple ID on the Captur developer team, to sign the app for a physical device
 - A Captur API key for runtime SDK use
 
 ## SDK dependency

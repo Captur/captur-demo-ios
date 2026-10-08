@@ -92,7 +92,7 @@ the `CapturDemo` target before the first device build.
 Xcode creates the certificate and provisioning profile on the first device
 build. Do not commit your team or bundle identifier.
 
-## 5. Running the application (recap)
+### 5. Running the application (recap)
 
 1. Configure GitLab authentication as described above.
 2. Open `CapturDemo.xcodeproj` in Xcode.

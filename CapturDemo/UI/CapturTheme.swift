@@ -25,6 +25,7 @@ extension Color {
     static let capturViolet = Color(hex: 0x4938E2)
     static let capturSuccess = Color(hex: 0x0E9F6E)
     static let capturCrimson = Color(hex: 0xDA2739)
+    static let capturWarning = Color(hex: 0xF59E0B)
 }
 
 // MARK: - Brand fonts

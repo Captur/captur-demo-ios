@@ -41,6 +41,7 @@ struct CameraExperienceView: View {
                 if let finalDecision = model.finalDecision {
                     CapturedImageView(
                         image: UIImage(data: finalDecision.imageData),
+                        decision: finalDecision.decision,
                         errorMessage: model.errorMessage,
                         onNewSession: { Task { await model.closeSession() } },
                         onRetake: model.retake
@@ -81,6 +82,7 @@ private struct PredictionView: View {
 
 private struct CapturedImageView: View {
     let image: UIImage?
+    let decision: CapturPredictionDecision?
     let errorMessage: String?
     let onNewSession: () -> Void
     let onRetake: () -> Void
@@ -101,6 +103,8 @@ private struct CapturedImageView: View {
                     .shadow(color: .black.opacity(0.15), radius: 12, y: 6)
                     .padding(.horizontal, 24)
             }
+
+            decisionBadge
 
             if let errorMessage {
                 Text(errorMessage)
@@ -125,5 +129,34 @@ private struct CapturedImageView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white.ignoresSafeArea())
         .environment(\.colorScheme, .light)
+    }
+
+    /// The final decision, front and center. `decision` can be nil on
+    /// manual or timeout captures — shown as "No decision" rather than
+    /// hiding the row.
+    private var decisionBadge: some View {
+        VStack(spacing: 4) {
+            Text(decision.map { $0.title ?? $0.value } ?? "No decision")
+                .font(.capturHeading(13, relativeTo: .subheadline))
+                .foregroundStyle(.white)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 6)
+                .background(decisionColor, in: Capsule())
+
+            if let reasonCode = decision?.reasonCode {
+                Text(reasonCode)
+                    .font(.capturBody(15, relativeTo: .subheadline))
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var decisionColor: Color {
+        switch decision?.value {
+        case "PASS": return .capturSuccess
+        case "FAIL": return .capturCrimson
+        case "IMPROVABLE": return .capturWarning
+        default: return .gray
+        }
     }
 }

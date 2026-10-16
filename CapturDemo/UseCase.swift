@@ -38,7 +38,7 @@ enum UseCase: String, CaseIterable, Identifiable {
         case .eBikeParking:
             return CapturLocation(latitude: 51.5074, longitude: -0.1278) // London
         case .eScooterParking:
-            return CapturLocation(latitude: 48.8566, longitude: 2.3522) // Paris
+            return CapturLocation(latitude: 51.5074, longitude: -0.1278) // London
         case .packageDelivery:
             return CapturLocation(latitude: 43.6532, longitude: -79.3832) // Toronto
         }

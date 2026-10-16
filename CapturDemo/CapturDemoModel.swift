@@ -12,9 +12,11 @@ import Combine
 /// Everything the SDK reports flows out through the published properties below.
 @MainActor
 final class CapturDemoModel: ObservableObject {
-    // One Captur instance for the lifetime of the app; initialization is
-    // lightweight and synchronous.
-    private let captur = Captur(apiKey: CapturConfig.apiKey)
+    // One Captur instance for the lifetime of the app, set by `initialise()`.
+    // Since SDK 1.0.0, initialisation is async and networked: it fetches the
+    // SDK configuration from Captur, so the device must be online the first
+    // time it succeeds in each app launch.
+    private var captur: Captur?
 
     // Chosen when the session is prepared; the camera reuses its location.
     // The SDK never reads GPS — the app supplies every coordinate.
@@ -48,11 +50,39 @@ final class CapturDemoModel: ObservableObject {
     /// so the same camera can be resumed later.
     @Published private(set) var isCameraPresented = false
 
+    /// True while `Captur.initialise` runs — the UI shows a startup spinner.
+    @Published private(set) var isInitialising = false
+
+    /// True once the SDK is ready; sessions can be prepared.
+    @Published private(set) var isInitialised = false
+
+    /// Before everything — `Captur.initialise(apiKey:)`, once per app launch.
+    /// Failures (no connectivity, server errors) are retryable: just call
+    /// this again. A same-key retry shares the SDK's single initialisation.
+    func initialise() async {
+        guard !isInitialised, !isInitialising else { return }
+
+        errorMessage = nil
+        isInitialising = true
+        defer { isInitialising = false }
+
+        do {
+            captur = try await Captur.initialise(apiKey: CapturConfig.apiKey)
+            isInitialised = true
+        } catch CapturInitialisationError.invalidAPIKey {
+            errorMessage = "Invalid API key. Check CapturDemo/Secrets.env."
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
     /// Step 1 — `captur.prepareSession`. Authenticates with the API key and
     /// downloads the policy model for the use case, so call it ahead of
     /// capture. A session is single-use: once its camera closes, prepare a
     /// new one.
     func prepareSession(for useCase: UseCase) async {
+        guard let captur else { return }
+
         self.useCase = useCase
         errorMessage = nil
         isPreparingSession = true

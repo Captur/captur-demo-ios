@@ -16,7 +16,17 @@ struct ContentView: View {
         VStack(spacing: 16) {
             Text("Select a model to load")
                 .font(.capturHeading(20, relativeTo: .title3))
-            if demo.session == nil {
+            if !demo.isInitialised {
+                if demo.errorMessage == nil {
+                    ProgressView("Initialising Captur…")
+                } else {
+                    // Initialisation failed (for example, offline at launch).
+                    // The error shows below; initialise() can simply run again.
+                    Button("Retry") {
+                        Task { await demo.initialise() }
+                    }
+                }
+            } else if demo.session == nil {
                 Picker("Use case", selection: $selectedUseCase) {
                     ForEach(UseCase.allCases) { useCase in
                         Text(useCase.title).tag(useCase)
@@ -72,6 +82,7 @@ struct ContentView: View {
         .foregroundStyle(Color.black)
         .background(Color.white.ignoresSafeArea())
         .environment(\.colorScheme, .light)
+        .task { await demo.initialise() }
         // Presentation is driven by the model: a camera controller exists
         // exactly while the camera should be on screen. Dismissing (swipe or
         // any close button) resets the flow, matching the SDK rule that an

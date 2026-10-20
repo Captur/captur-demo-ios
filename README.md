@@ -8,7 +8,7 @@ The app mimics real use cases — verifying an **e-bike or e-scooter is parked c
 
 In the order you will need them:
 
-1. A GitLab personal access token that can read the SDK repository and its package artifacts
+1. Captur-issued GitLab deploy credentials with `read_repository` and `read_package_registry` scopes
 2. macOS with Xcode 26.6 or a compatible version
 3. A Captur API key for runtime SDK use
 4. A physical iPhone running iOS 15.0 or later for the full flow (the simulator has no camera; the app still builds and runs)
@@ -22,42 +22,48 @@ the project opens, so the GitLab credentials must exist first.
 
 `~/.netrc` lives in your home directory, so the commands below work from any
 folder — and the file is per machine and per user: create it on each Mac that
-will run Xcode. Append this block (creating the file if needed), replacing
-both placeholders with your real GitLab username and the token itself, then restrict access:
+will run Xcode. Add or update the entry below using the `http_basic.username`
+and `http_basic.password` from the Captur credential bundle, then restrict access:
 
 ```sh
 cat >> ~/.netrc <<'EOF'
-machine gitlab.development.captur.ai
-  login <your-username>
-  password <personal-access-token>
+machine gitlab.captur.ai
+  login captur-demo-apps-mobile-sdk-g1
+  password <http_basic.password>
 EOF
 chmod 600 ~/.netrc
 ```
 
-Verify it works before involving Xcode — this must print `200`:
+Verify repository access before involving Xcode — this must print the tag's revision:
 
 ```sh
-curl -n -s -o /dev/null -w "%{http_code}\n" https://gitlab.development.captur.ai/api/v4/projects
+GIT_TERMINAL_PROMPT=0 git ls-remote \
+  https://gitlab.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git \
+  refs/tags/1.0.0
 ```
 
-(`-n` tells curl to use `~/.netrc`, the same way Xcode will. A `401` means
-the username or token is wrong; see the troubleshooting table.)
+Deploy credentials authorize repository and package downloads; they do not
+need access to the general GitLab projects API. These credentials are for
+installing the SDK and are separate from the Captur API key used at runtime.
 
 Never commit the token or the `~/.netrc` file to this repository.
 
 ### 2. Open the project and resolve the SDK
 
-Open `CapturDemo.xcodeproj` in Xcode and manually add the Swift package
-dependency — resolution uses the `~/.netrc` credentials from the previous
-step, for both the repository and the binary artifact download. 
+Open `CapturDemo.xcodeproj` in Xcode. The project already declares the
+`CapturSDK` product, pinned to exactly **1.0.0**. Resolution uses the
+`~/.netrc` credentials from the previous step for both the repository and
+the binary artifact download.
 
-Use this link to resolve the package:
+The package repository is:
 ```text
-https://gitlab.development.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git
+https://gitlab.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git
 ```
 If Xcode already tried and failed before the credentials existed, retry with
-**File → Packages → Resolve Package Versions** or alternatively remove the package from the list of
-dependancies and try again.
+**File → Packages → Resolve Package Versions**.
+
+See the [Captur iOS implementation guide](https://docs.captur.ai/ios/implementation/)
+for the SDK installation and lifecycle APIs.
 
 ### 3. Add your Captur API key
 
@@ -114,8 +120,8 @@ build. Do not commit your team or bundle identifier.
 
 | Error | Cause |
 | --- | --- |
-| `could not read Username for 'https://gitlab.development.captur.ai': terminal prompts disabled` | `~/.netrc` has no entry for `gitlab.development.captur.ai`, or the entry's credentials are rejected |
-| `failed downloading '…/CapturSDK.xcframework.zip' … badResponseStatusCode(401)` | The `~/.netrc` entry holds an account password instead of a personal access token |
+| `could not read Username for 'https://gitlab.captur.ai': terminal prompts disabled` | `~/.netrc` has no entry for `gitlab.captur.ai`, or the deploy credentials are rejected |
+| `failed downloading '…/CapturSDK.xcframework.zip' … badResponseStatusCode(401)` | The deploy credentials are invalid or lack `read_package_registry` access |
 | `Failed Registering Bundle Identifier The app identifier "test" cannot be registered to your development team because it is not available. Change your bundle identifier to a unique string to try again.` | The specific bundle identifier you picked was already taken|
 
 ## The demo flow
@@ -131,7 +137,7 @@ For deterministic teardown, call await cameraController.close() from the host's 
 All CapturSDK lifecycle code lives in `CapturDemoModel.swift`. The integration itself remains a handful of small calls:
 
 ```swift
-let captur = Captur(apiKey: CapturConfig.apiKey)
+let captur = try await Captur.initialise(apiKey: CapturConfig.apiKey)
 
 session = try await captur.prepareSession(
     policyType: useCase.policyType,
@@ -162,3 +168,15 @@ await cameraController.close()
 | `CapturDemo/UI/CapturTheme.swift` | Brand colors, fonts, and button style (fonts in `UI/Fonts/`) |
 | `CapturDemo.xcodeproj` | Xcode application and Swift package configuration |
 | `.github/workflows/build.yml` | GitHub Actions build workflow |
+
+## Continuous integration
+
+Configure the repository Actions secret `GITLAB_TOKEN` with the credential
+bundle's `http_basic.password`. The workflow uses
+`captur-demo-apps-mobile-sdk-g1` as the username and `gitlab.captur.ai` as
+the host, writes a temporary `~/.netrc`, and removes it when the job ends.
+Keep `Package.resolved` committed so CI builds the pinned SDK release.
+
+CI builds for the iOS Simulator with signing disabled and supplies its own
+bundle identifier, `ai.captur.demo.ci`. It needs neither an Apple signing
+certificate nor a runtime Captur API key.

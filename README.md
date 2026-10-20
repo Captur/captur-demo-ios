@@ -67,15 +67,10 @@ for the SDK installation and lifecycle APIs.
 
 ### 3. Add your Captur API key
 
-Create `CapturDemo/Secrets.env` (gitignored — real keys never reach source
-control) containing your API key:
-
-```sh
-echo 'CAPTUR_API_KEY=your-api-key' > CapturDemo/Secrets.env
-```
-
-Without the file the app still builds and runs; preparing a session fails
-with an authentication error.
+The demo passes its API key directly to `Captur.initialise(apiKey:)` in
+`CapturDemo/CapturDemoModel.swift`. Replace `<YOUR_CAPTUR_API_KEY>` there
+with your workspace's API key. This key is separate from the GitLab token
+used to download the SDK.
 
 ### 4. Code signing
 
@@ -103,15 +98,8 @@ build. Do not commit your team or bundle identifier.
 1. Configure GitLab authentication as described above.
 2. Open `CapturDemo.xcodeproj` in Xcode.
 3. Allow Xcode to resolve the Swift package dependency.
-4. Create `CapturDemo/Secrets.env` (gitignored — real keys never reach source
-   control) containing your API key:
-
-   ```sh
-   echo 'CAPTUR_API_KEY=your-api-key' > CapturDemo/Secrets.env
-   ```
-
-   Without the file the app still builds and runs; preparing a session fails
-   with an authentication error.
+4. Replace `<YOUR_CAPTUR_API_KEY>` in `CapturDemo/CapturDemoModel.swift`
+   with your Captur workspace's API key.
 5. To run on a physical iPhone, set up code signing as described below.
 6. Select a device and run the `CapturDemo` scheme.
 
@@ -137,7 +125,7 @@ For deterministic teardown, call await cameraController.close() from the host's 
 All CapturSDK lifecycle code lives in `CapturDemoModel.swift`. The integration itself remains a handful of small calls:
 
 ```swift
-let captur = try await Captur.initialise(apiKey: CapturConfig.apiKey)
+let captur = try await Captur.initialise(apiKey: "<YOUR_CAPTUR_API_KEY>")
 
 session = try await captur.prepareSession(
     policyType: useCase.policyType,
@@ -160,7 +148,6 @@ await cameraController.close()
 | --- | --- |
 | `CapturDemo/CapturDemoApp.swift` | Application entry point |
 | `CapturDemo/CapturDemoModel.swift` | CapturSDK lifecycle and event handling |
-| `CapturDemo/CapturConfig.swift` | Reads the API key from the gitignored `Secrets.env` |
 | `CapturDemo/UseCase.swift` | The demo use cases (policy type, location) |
 | `CapturDemo/UI/ContentView.swift` | Use-case picker and the two preparation steps |
 | `CapturDemo/UI/CameraExperienceView.swift` | Camera, live reason code, and the captured result |

@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "captur-mobile-ios-sdk",
+      "kind" : "remoteSourceControl",
+      "location" : "https://gitlab.captur.ai/captur/mobile-sdks/captur-mobile-ios-sdk.git",
+      "state" : {
+        "revision" : "eec7bb94ca5d36d34627cb5b0b0431857412a963",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 2
+}

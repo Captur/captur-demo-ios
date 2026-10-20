@@ -21,7 +21,7 @@ jobs:
     timeout-minutes: 30
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.6.app/Contents/Developer
-      GITLAB_HOST: gitlab.development.captur.ai
+      GITLAB_HOST: gitlab.captur.ai
       GITLAB_USERNAME: captur-demo-apps-mobile-sdk-g1
 
     steps:
@@ -30,12 +30,12 @@ jobs:
 
       - name: Configure GitLab authentication
         env:
-          GITLAB_ACCESS_TOKEN: ${{ secrets.CAPTUR_REGIONAL_GITLAB_TOKEN }}
+          GITLAB_ACCESS_TOKEN: ${{ secrets.GITLAB_TOKEN }}
         run: |
           set -euo pipefail
 
           if [[ -z "${GITLAB_ACCESS_TOKEN}" ]]; then
-            echo "::error::The CAPTUR_REGIONAL_GITLAB_TOKEN repository secret is not configured."
+            echo "::error::The GITLAB_TOKEN repository secret is not configured."
             exit 1
           fi
 
@@ -55,6 +55,8 @@ jobs:
             -configuration Debug \
             -destination 'generic/platform=iOS Simulator' \
             -disableAutomaticPackageResolution \
+            -packageAuthorizationProvider netrc \
+            PRODUCT_BUNDLE_IDENTIFIER=ai.captur.demo.ci \
             CODE_SIGNING_ALLOWED=NO \
             build
 

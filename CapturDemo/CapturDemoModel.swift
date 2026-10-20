@@ -67,10 +67,12 @@ final class CapturDemoModel: ObservableObject {
         defer { isInitialising = false }
 
         do {
-            captur = try await Captur.initialise(apiKey: CapturConfig.apiKey)
+            captur = try await Captur.initialise(
+                apiKey: "<YOUR_CAPTUR_API_KEY>"
+            )
             isInitialised = true
         } catch CapturInitialisationError.invalidAPIKey {
-            errorMessage = "Invalid API key. Check CapturDemo/Secrets.env."
+            errorMessage = "Invalid Captur API key."
         } catch {
             errorMessage = error.localizedDescription
         }
